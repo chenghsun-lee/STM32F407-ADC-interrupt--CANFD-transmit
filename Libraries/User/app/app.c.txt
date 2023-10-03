@@ -1,0 +1,79 @@
+void APP_TransmitSwitchState(void)
+{
+	 uint32_t i = 0;
+	
+	 static uint8_t send_flag = 0; 
+	static uint32_t time_delay = 0; ;
+	
+	  APP_SwitchState newSwitchState;
+
+    // Check if switch has changed
+    Nop();
+    
+		if(APP_S1_READ() == 0)
+		{			
+			do
+			{
+				for(i=0;i<1000000;i++);
+				
+			}	while(APP_S1_READ() == 0);
+			
+			for(i=0;i<1000000;i++);
+			
+			send_flag = ~send_flag;
+		}
+		
+		
+	
+    if (send_flag != 0 ) {
+			time_delay++;
+			if(time_delay >= 10000)
+			{
+				time_delay = 0;
+				
+        // Transmit new state
+        txObj.bF.id.SID = BUTTON_STATUS_ID;
+
+        txObj.bF.ctrl.DLC = CAN_DLC_1;
+        txObj.bF.ctrl.IDE = 0;
+        txObj.bF.ctrl.BRS = 1;
+        txObj.bF.ctrl.FDF = 1;
+
+        txd[0] = 0x55;
+
+        APP_TransmitMessageQueue();
+			}
+    }
+		else
+		{
+			time_delay = 0;
+		}
+
+
+		
+//		
+//    APP_SwitchState newSwitchState;
+
+//    // Check if switch has changed
+//    Nop();
+//    newSwitchState.S1 = APP_S1_READ();
+
+//    bool switchChanged = newSwitchState.S1 != lastSwitchState.S1;
+
+//    if (switchChanged) {
+//        // Transmit new state
+//        txObj.bF.id.SID = BUTTON_STATUS_ID;
+
+//        txObj.bF.ctrl.DLC = CAN_DLC_1;
+//        txObj.bF.ctrl.IDE = 0;
+//        txObj.bF.ctrl.BRS = 1;
+//        txObj.bF.ctrl.FDF = 1;
+
+//        txd[0] = 0;
+//        if (newSwitchState.S1 == APP_SWITCH_PRESSED) txd[0] += 0x1;
+
+//        APP_TransmitMessageQueue();
+//    }
+
+//    lastSwitchState.S1 = newSwitchState.S1;
+}
